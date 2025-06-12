@@ -1,0 +1,250 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+#unity-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#unity-canvas-container {
+    width: 100%;
+    height:100%;
+}
+
+#unity-canvas {
+    background: transparent;
+/*    width: 100vw !important;
+    height: 100vh !important;*/
+}
+
+#loading-background {
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Horizontally center */
+    align-items: center;
+}
+
+#unity-loading-bar {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: none
+}
+
+#enter-button {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#unity-logo {
+    width: 100%;
+    height: 70px;
+    background: url('Logo_Xense_AR.png') no-repeat center;
+    background-size: cover;
+}
+
+#unity-progress-bar-empty {
+    width: 141px;
+    height: 18px;
+    margin-top: 10px;
+    margin-left: 6.5px;
+    background: url('progress-bar-empty-dark.png') no-repeat center
+}
+
+#unity-progress-bar-full {
+    width: 0%;
+    height: 18px;
+    margin-top: 10px;
+    background: url('progress-bar-full-dark.png') no-repeat center
+}
+
+#unity-footer {
+    position: absolute;
+    bottom: 0px;
+    right: 0px
+}
+
+#unity-webgl-logo {
+    float: left;
+    width: 204px;
+    height: 38px;
+    background: url('webgl-logo.png') no-repeat center
+}
+
+#unity-build-title {
+    float: right;
+    margin-right: 10px;
+    line-height: 38px;
+    font-family: arial;
+    font-size: 18px
+}
+
+#unity-fullscreen-button {
+    cursor: pointer;
+    float: right;
+    width: 38px;
+    height: 38px;
+    background: url('fullscreen-button.png') no-repeat center
+}
+
+#unity-webxr-link {
+    float: left;
+    margin-right: 10px;
+    line-height: 38px;
+    font-family: arial;
+    font-size: 18px
+}
+
+#entervr:enabled {
+    float: right; /*width: 38px;*/
+    height: 38px;
+    background-color: #1eaed3;
+    display: inline-block;
+    border: 0;
+}
+
+#enterar:enabled {
+    float: right; /*width: 38px;*/
+    height: 38px;
+    background-color: #1eaed3;
+    display: inline-block;
+    border: 0;
+}
+
+#entervr:disabled {
+    float: right; /*width: 38px;*/
+    height: 38px;
+    background-color: #dddddd;
+    display: inline-block;
+    border: 0;
+}
+
+#enterar:disabled {
+    float: right; /*width: 38px;*/
+    height: 38px;
+    background-color: #dddddd;
+    display: inline-block;
+    border: 0;
+}
+
+#experience-info {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-like {
+    display: inline-block;
+    padding: 15px 30px;
+    /* Larger padding for easier tapping on mobile */
+    background-color: #ff9100;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    font-size: 16px;
+    touch-action: manipulation;
+    /* Helps improve touch performance */
+    transition: background-color 0.3s, transform 0.1s ease;
+}
+
+.button-like:hover {
+    background-color: #ff9100;
+}
+
+.button-like:active {
+    transform: scale(0.98);
+    /* Slightly shrink the button when pressed on mobile */
+}
+
+.button-like:disabled:active {
+    transform: none;
+    /* Prevent scaling when the button is disabled */
+}
+
+.fade-in {
+    animation: fadeIn 2s ease-in-out;
+    /* Apply the animation */
+}
+
+/* Keyframes for fade-in effect */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        /* Start invisible */
+    }
+
+    100% {
+        opacity: 1;
+        /* End fully visible */
+    }
+}
+
+.loading-circle {
+    border: 8px solid #f3f3f3;
+    /* Light gray border */
+    border-top: 8px solid #ff9100;
+    /* Blue top border */
+    border-radius: 50%;
+    /* Make it circular */
+    width: 30px;
+    /* Size of the circle */
+    height: 30px;
+    /* Size of the circle */
+    animation: spin 1s linear infinite;
+    /* Animation to spin the circle */
+}
+
+/* Keyframes to animate the rotation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+        /* Start at 0 degrees */
+    }
+
+    100% {
+        transform: rotate(360deg);
+        /* End at 360 degrees (full circle) */
+    }
+}
+
+.scaling-div {
+    display: inline-block;
+    animation: scaleUpDown 2s ease-in-out infinite;
+}
+
+/* Define the keyframes for scaling */
+@keyframes scaleUpDown {
+    0% {
+        transform: scale(1);
+        /* Initial scale */
+    }
+
+    50% {
+        transform: scale(1.05);
+        /* Scale up */
+    }
+
+    100% {
+        transform: scale(1);
+        /* Scale back to original size */
+    }
+}

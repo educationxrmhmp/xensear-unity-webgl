@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Unity WebGL Player | Xense AR</title>
+  <meta name="description" content="">
+  <link rel="shortcut icon" href="TemplateData/Logo_X_BG.ico">
+  <link rel="stylesheet" href="TemplateData/style.css?v=1.0.4">
+</head>
+
+<body>
+  <div id="unity-container">
+    <div id="unity-canvas-container">
+      <canvas id="unity-canvas" style="width: 100%; height: 100%;"></canvas>
+    </div>
+    <div id="loading-background" style="width: 100%; height: 100%;">
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="experience-info" class="fade-in">
+        <img id="world-space-img" alt="Description of image"
+          style="max-width: 70%;border: solid 1px #ff9100; border-radius: 25px;" class="scaling-div">
+        <div id="download-progress" style="margin-top: 25px; font-weight: 700;">Đang tải nội dung ...</div>
+        <div id="content-loading-bar" class="loading-circle" style="margin-top: 10px;"></div>
+      </div>
+    </div>
+    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);">
+      <button id="enterExperienceButton" class="button-like fade-in" style="border: none;">Bắt đầu Trải nghiệm</button>
+    </div>
+  </div>
+  <script>
+    UpdateWorldSpaceInfo();
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/WebXR.loader.js";
+    var config = {
+      dataUrl: buildUrl + "/WebXR.data.unityweb",
+      frameworkUrl: buildUrl + "/WebXR.framework.js.unityweb",
+      codeUrl: buildUrl + "/WebXR.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "viettel.mhmp",
+      productName: "Xense AR",
+      productVersion: "0.1",
+    };
+
+    var container = document.querySelector("#unity-container");
+    var canvas = document.querySelector("#unity-canvas");
+    var canvasContainer = document.querySelector("#unity-canvas-container");
+    var loadingBar = document.querySelector("#unity-loading-bar");
+    var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+    var unityInstance = null;
+
+    var worldSpaceImage = document.getElementById('world-space-img');
+    var experienceInfo = document.getElementById('experience-info');
+    var enterExperienceButton = document.getElementById('enterExperienceButton');
+    var contentDownloadProgress = document.getElementById('download-progress');
+    var contentLoadingBar = document.getElementById('content-loading-bar');
+    var loadingBackground = document.getElementById('loading-background');
+
+    if ("dark" == "light") {
+      document.body.style.backgroundColor = "#CCCCCC";
+    } else {
+      document.body.style.backgroundColor = "#231F20";
+    }
+
+    loadingBar.style.display = "block";
+    experienceInfo.style.display = "none";
+    enterExperienceButton.style.display = "none";
+    loadingBackground.style.display = "flex";
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = 100 * progress + "%";
+      }).then((instance) => {
+        document.body.style.backgroundColor = "transparent";
+        window.unityInstance = instance;
+        unityInstance = instance;
+        loadingBar.style.display = "none";
+        HandleParams();
+        if (fullscreenButton) {
+          fullscreenButton.onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+        }
+      }).catch((message) => {
+        alert(message);
+      });
+    };
+
+    window.OnReceivedUnityMessage = (message) => {
+      var parsedObject = JSON.parse(message);
+      switch (parsedObject.type) {
+        case "updateAnchoringDownloadProgress":
+          experienceInfo.style.display = "flex";
+          HandleDownloadProgress(parsedObject.message);
+          break;
+        default:
+          break;
+      }
+    };
+
+    function HandleDownloadProgress(downloadProgress) {
+      //console.log("Download progress message from Unity: " + downloadProgress);
+      contentDownloadProgress.textContent = "Đang tải nội dung ... - " + parseFloat(downloadProgress).toFixed(2) + "%";
+      if (parseFloat(downloadProgress) >= 100) {
+        //Show Enter Button
+        contentDownloadProgress.style.visibility = "hidden";
+        contentLoadingBar.style.visibility = "hidden";
+        enterExperienceButton.style.display = "inline-block";
+      }
+    }
+
+    function UpdateWorldSpaceInfo() {
+      const url = window.location.href;
+      const params = new URLSearchParams(window.location.search);
+      const worldID = params.get('worldID');
+      const data = {
+        type: 'GetWorldSpaceById',
+        worldId: worldID
+      };
+
+      fetch('https://xensear.vn/api/v1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(result => {
+          const imageUrl = result.data.thumbnailImg;
+          worldSpaceImage.src = imageUrl;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    function HandleParams() {
+      // Get the full URL of the current page
+      const url = window.location.href;
+      // Use URLSearchParams to extract query parameters
+      const params = new URLSearchParams(window.location.search);
+      // Get specific parameters
+      const blockID = params.get('blockID');
+      const worldID = params.get('worldID');
+      const modelScale = params.get('modelScale')
+      console.log("Block ID" + blockID); // Value of 'blockID' parameter
+      console.log("World ID" + worldID); // Value of 'worldID' parameter
+      console.log("World ID" + modelScale); // Value of 'modelScale' parameter
+      let message = '{"type" : "startExperience" , "message" : "{\\\"blockID\\\" : \\\"' + blockID + '\\\",\\\"worldID\\\" : \\\"' + worldID + '\\\", \\\"modelScale\\\" : \\\"' + modelScale + '\\\"' + '}"}';
+      console.log("Send Message: " + message);
+      window.unityInstance.SendMessage("JavascriptMessageReceiver", "StartExperience", message);
+    }
+
+    function getMobileOperatingSystem() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      var Iphone = userAgent.indexOf("iphone") > -1;
+      var Ipad = userAgent.indexOf("ipad") > -1;
+      var Intel = userAgent.indexOf("intel") > -1;
+      // var iOS = userAgent.indexOf("iphone") > -1;
+      if (Iphone || Ipad || Intel) {
+        return "iOS";
+      } else {
+        return "Android";
+      }
+    }
+
+    document.body.appendChild(script);
+
+    document.addEventListener('onARSupportedCheck', function (event) {
+      if (getMobileOperatingSystem().includes("Android")) {
+        enterExperienceButton.disabled = !event.detail.supported;
+        if (!event.detail.supported) {
+          enterExperienceButton.style.backgroundColor = "#80705b";
+          enterExperienceButton.textContent = "Thiết bị không hỗ trợ";
+        }
+      }
+    }, false);
+    document.addEventListener('onVRSupportedCheck', function (event) {
+      if (getMobileOperatingSystem().includes("iOS")) {
+        enterExperienceButton.disabled = !event.detail.supported;
+        if (!event.detail.supported) {
+          enterExperienceButton.style.backgroundColor = "#80705b";
+          enterExperienceButton.textContent = "Thiết bị không hỗ trợ";
+        }
+      }
+    }, false);
+
+    enterExperienceButton.addEventListener('click', function (event) {
+      if (getMobileOperatingSystem().includes("Android")) {
+        unityInstance.Module.WebXR.toggleAR();
+      } else if (getMobileOperatingSystem().includes("iOS")) {
+        loadingBackground.style.display = "none";
+        enterExperienceButton.style.display = "none";
+        unityInstance.Module.WebXR.toggleVR();
+        setTimeout(() => { enterVRButton.disabled = false; }, 500);
+
+        if (typeof (unityInstance) != "undefined" && unityInstance != null)
+          unityInstance.SendMessage("Main Camera", "SetVideoDims");
+
+        if (typeof (window.unityWebXRTextureProperty) == "undefined" || window.unityWebXRTextureProperty == null) {
+          window.unityWebXRTextureProperty = {
+            "width": 540,
+            "height": 960
+          }
+        }
+      }
+    }, false);
+
+  </script>
+</body>
+
+</html>
